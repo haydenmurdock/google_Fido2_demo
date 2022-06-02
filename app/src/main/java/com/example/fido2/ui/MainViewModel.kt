@@ -18,6 +18,7 @@ package com.example.fido2.ui
 
 import androidx.lifecycle.ViewModel
 import com.example.fido2.repository.AuthRepository
+import com.example.fido2.repository.SignInState
 import com.google.android.gms.fido.fido2.Fido2ApiClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -31,6 +32,9 @@ import javax.inject.Inject
 
     fun setFido2ApiClient(client: Fido2ApiClient?) {
         repository.setFido2APiClient(client)
+    }
+    fun setupOther(){
+        repository.signInStateMutable.tryEmit(SignInState.Other("User hasn't picked auth"))
     }
 
 }

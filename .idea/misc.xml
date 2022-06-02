@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/ic_add.xml" value="0.222" />
+        <entry key="app/src/main/res/layout/fragment_fido_picker.xml" value="0.34236675700090335" />
         <entry key="app/src/main/res/layout/main_activity.xml" value="0.17916666666666667" />
       </map>
     </option>

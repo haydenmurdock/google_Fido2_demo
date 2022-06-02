@@ -18,12 +18,15 @@ package com.example.android.fido2
 
 import android.app.Application
 import android.os.Build
+import android.os.StrictMode
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.example.fido2.api.AddHeaderInterceptor
 import com.example.fido2.BuildConfig
+import com.example.fido2.repository.AuthRepository
+import com.example.fido2.repository.SignInState
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,5 +68,10 @@ object AppModule {
         return PreferenceDataStoreFactory.create {
             application.preferencesDataStoreFile("auth")
         }
+    }
+        init {
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
     }
 }

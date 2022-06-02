@@ -47,4 +47,10 @@ sealed class SignInState {
     data class SignedIn(
         val username: String
     ) : SignInState()
+    /**
+     * the user needs to pick auth method
+     */
+    data class Other(
+        val error: String
+    ) : SignInState()
 }

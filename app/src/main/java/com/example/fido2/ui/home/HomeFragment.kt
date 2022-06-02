@@ -18,11 +18,13 @@ package com.example.fido2.ui.home
 
 import android.app.Activity
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -30,7 +32,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.fido2.R
 import com.example.fido2.databinding.HomeFragmentBinding
+import com.google.android.gms.fido.Fido
+import com.google.android.gms.fido.fido2.api.common.AuthenticatorErrorResponse
+import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -44,6 +50,8 @@ class HomeFragment : Fragment(), DeleteConfirmationFragment.Listener {
 
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var binding: HomeFragmentBinding
+    private lateinit var mHandler: Handler
+    private lateinit var mRunnable:Runnable
 
     private val createCredentialIntentLauncher = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
@@ -106,39 +114,44 @@ class HomeFragment : Fragment(), DeleteConfirmationFragment.Listener {
             lifecycleScope.launch {
                 val intent = viewModel.registerRequest()
                 if (intent != null) {
-
-                    // TODO(2): Open the fingerprint dialog.
                     // - Open the fingerprint dialog by launching the intent from FIDO2 API.
-
+                    // TODO(2): Open the fingerprint dialog.
+                    val intent = viewModel.registerRequest()
+                    if (intent != null) {
+                        createCredentialIntentLauncher.launch(
+                            IntentSenderRequest.Builder(intent).build()
+                        )
+                    }
                 }
             }
         }
     }
-
-    override fun onDeleteConfirmed(credentialId: String) {
-        viewModel.removeKey(credentialId)
-    }
-
     private fun handleCreateCredentialResult(activityResult: ActivityResult) {
 
         // TODO(3): Receive ActivityResult with the new Credential
         // - Extract byte array from result data using Fido.FIDO2_KEY_CREDENTIAL_EXTRA.
         // (continued below
-        val bytes: ByteArray? = null
-
+        val bytes = activityResult.data?.getByteArrayExtra(Fido.FIDO2_KEY_CREDENTIAL_EXTRA)
         when {
             activityResult.resultCode != Activity.RESULT_OK ->
-                Toast.makeText(requireContext(), R.string.cancelled, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.cancelled, Toast.LENGTH_LONG).show()
             bytes == null ->
-                Toast.makeText(requireContext(), R.string.credential_error, Toast.LENGTH_SHORT)
+                Toast.makeText(requireContext(), R.string.credential_error, Toast.LENGTH_LONG)
                     .show()
             else -> {
-
-                // - Deserialize bytes into a PublicKeyCredential.
-                // - Check if the response is an AuthenticationErrorResponse. If so, show a toast.
-                // - Otherwise, pass the credential to the viewModel.
-
+                val credential = PublicKeyCredential.deserializeFromBytes(bytes)
+                val response = credential.response
+                if (response is AuthenticatorErrorResponse) {
+                    Toast.makeText(requireContext(), response.errorMessage, Toast.LENGTH_LONG)
+                        .show()
+                } else {
+                    viewModel.registerResponse(credential)
+                }
             }
+                }
+            }
+
+        override fun onDeleteConfirmed(credentialId: String) {
+            viewModel.removeKey(credentialId)
         }
-    }
 }

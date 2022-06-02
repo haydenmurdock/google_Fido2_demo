@@ -23,9 +23,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.example.android.fido2.toBase64
 import com.example.fido2.api.ApiException
 import com.example.fido2.api.ApiResult
-import com.example.android.fido2.api.AuthApi
+import com.example.fido2.api.AuthApi
 import com.example.fido2.api.Credential
 import com.google.android.gms.fido.fido2.Fido2ApiClient
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -69,7 +71,7 @@ class AuthRepository @Inject constructor(
         fido2ApiClient = client
     }
 
-    private val signInStateMutable = MutableSharedFlow<SignInState>(
+    val signInStateMutable = MutableSharedFlow<SignInState>(
         replay = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
@@ -209,6 +211,8 @@ class AuthRepository @Inject constructor(
         signInStateMutable.emit(SignInState.SignedOut)
     }
 
+
+
     private suspend fun forceSignOut() {
         dataStore.edit { prefs ->
             prefs.remove(USERNAME)
@@ -234,6 +238,18 @@ class AuthRepository @Inject constructor(
                 //   new credential. This method returns a Task object.
                 // - Call await() on the Task and return the result so that the UI can open the
                 //   fingerprint dialog.
+                when (val apiResult = api.registerRequest(sessionId)) {
+                    ApiResult.SignedOutFromServer -> forceSignOut()
+                    is ApiResult.Success -> {
+                        if (apiResult.sessionId != null) {
+                            dataStore.edit { prefs ->
+                                prefs[SESSION_ID] = apiResult.sessionId
+                            }
+                        }
+                        val task = client.getRegisterPendingIntent(apiResult.data)
+                        return task.await()
+                    }
+                }
 
             } catch (e: Exception) {
                 Log.e(TAG, "Cannot call registerRequest", e)
@@ -257,6 +273,17 @@ class AuthRepository @Inject constructor(
             //   LOCAL_CREDENTIAL_ID. The ID can be obtained from the `rawId` field of
             //   the PublicKeyCredential object.
 
+            val credentialId = credential.rawId.toBase64()
+            when (val result = api.registerResponse(sessionId, credential)) {
+                ApiResult.SignedOutFromServer -> forceSignOut()
+                is ApiResult.Success -> {
+                    dataStore.edit { prefs ->
+                        result.sessionId?.let { prefs[SESSION_ID] = it }
+                        prefs[CREDENTIALS] = result.data.toStringSet()
+                        prefs[LOCAL_CREDENTIAL_ID] = credentialId
+                    }
+                }
+            }
         } catch (e: ApiException) {
             Log.e(TAG, "Cannot call registerResponse", e)
         }
@@ -293,6 +320,15 @@ class AuthRepository @Inject constructor(
             // - Call await() on the Task and return the result so that the UI can open the
             //   fingerprint dialog.
 
+            if (credentialId != null) {
+                when (val apiResult = api.signinRequest(sessionId, credentialId)) {
+                    ApiResult.SignedOutFromServer -> forceSignOut()
+                    is ApiResult.Success -> {
+                        val task = client.getSignPendingIntent(apiResult.data)
+                        return task.await()
+                    }
+                }
+            }
         }
         return null
     }
@@ -315,6 +351,20 @@ class AuthRepository @Inject constructor(
             //   `signInStateMutable.emit(SignInState.SignedIn(username))`.
             // - Call refreshCredentials to fetch the user's credentials so they can be listed in
             //   the UI.
+
+            val credentialId = credential.rawId.toBase64()
+            when (val result = api.signinResponse(sessionId, credential)) {
+                ApiResult.SignedOutFromServer -> forceSignOut()
+                is ApiResult.Success -> {
+                    dataStore.edit { prefs ->
+                        result.sessionId?.let { prefs[SESSION_ID] = it }
+                        prefs[CREDENTIALS] = result.data.toStringSet()
+                        prefs[LOCAL_CREDENTIAL_ID] = credentialId
+                    }
+                    signInStateMutable.emit(SignInState.SignedIn(username))
+                    refreshCredentials()
+                }
+            }
 
         } catch (e: ApiException) {
             Log.e(TAG, "Cannot call registerResponse", e)

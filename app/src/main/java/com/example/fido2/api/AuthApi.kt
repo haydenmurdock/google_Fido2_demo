@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.fido2.api
+package com.example.fido2.api
 
 import android.util.JsonReader
 import android.util.JsonToken
@@ -23,28 +23,10 @@ import android.util.Log
 import com.example.android.fido2.decodeBase64
 import com.example.android.fido2.toBase64
 import com.example.fido2.BuildConfig
-import com.example.fido2.api.ApiException
-import com.example.fido2.api.ApiResult
-import com.example.fido2.api.Credential
-import com.google.android.gms.fido.fido2.api.common.Attachment
-import com.google.android.gms.fido.fido2.api.common.AuthenticatorAssertionResponse
-import com.google.android.gms.fido.fido2.api.common.AuthenticatorAttestationResponse
-import com.google.android.gms.fido.fido2.api.common.AuthenticatorSelectionCriteria
-import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
-import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialCreationOptions
-import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialDescriptor
-import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialParameters
-import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialRequestOptions
-import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialRpEntity
-import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType
-import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialUserEntity
+import com.google.android.gms.fido.fido2.api.common.*
+import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import okhttp3.ResponseBody
 import ru.gildor.coroutines.okhttp.await
 import java.io.StringReader
 import java.io.StringWriter
@@ -138,6 +120,7 @@ class AuthApi @Inject constructor(
                 })
                 .build()
         )
+
         val response = call.await()
         return response.result("Error calling /registerRequest") {
             parsePublicKeyCredentialCreationOptions(
@@ -152,7 +135,7 @@ class AuthApi @Inject constructor(
      * @return A list of all the credentials registered on the server, including the newly
      * registered one.
      */
-    private suspend fun registerResponse(
+    suspend fun registerResponse(
         sessionId: String,
         credential: PublicKeyCredential
     ): ApiResult<List<Credential>> {
@@ -300,7 +283,7 @@ class AuthApi @Inject constructor(
         return builder.build()
     }
 
-    private fun parsePublicKeyCredentialCreationOptions(
+private fun parsePublicKeyCredentialCreationOptions(
         body: ResponseBody
     ): PublicKeyCredentialCreationOptions {
         val builder = PublicKeyCredentialCreationOptions.Builder()

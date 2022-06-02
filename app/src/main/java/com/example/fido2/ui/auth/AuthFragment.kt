@@ -24,12 +24,16 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.fido2.R
 import com.example.fido2.databinding.AuthFragmentBinding
+import com.google.android.gms.fido.Fido
+import com.google.android.gms.fido.fido2.api.common.AuthenticatorErrorResponse
+import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -72,15 +76,19 @@ class AuthFragment : Fragment() {
 
                     // TODO(6): Open the fingerprint dialog.
                     // - Open the fingerprint dialog by launching the intent from FIDO2 API.
-
+                    viewModel.signinRequests.collect { intent ->
+                        signIntentLauncher.launch(
+                            IntentSenderRequest.Builder(intent).build()
+                        )
+                    }
                 }
-            }
-            launch {
-                viewModel.processing.collect { processing ->
-                    if (processing) {
-                        binding.processing.show()
-                    } else {
-                        binding.processing.hide()
+                launch {
+                    viewModel.processing.collect { processing ->
+                        if (processing) {
+                            binding.processing.show()
+                        } else {
+                            binding.processing.hide()
+                        }
                     }
                 }
             }
@@ -92,19 +100,22 @@ class AuthFragment : Fragment() {
         // TODO(7): Handle the ActivityResult
         // - Extract byte array from result data using Fido.FIDO2_KEY_CREDENTIAL_EXTRA.
         // (continued below)
-        val bytes: ByteArray? = null
-
+        val bytes = activityResult.data?.getByteArrayExtra(Fido.FIDO2_KEY_CREDENTIAL_EXTRA)
         when {
             activityResult.resultCode != Activity.RESULT_OK ->
                 Toast.makeText(requireContext(), R.string.cancelled, Toast.LENGTH_SHORT).show()
             bytes == null ->
-                Toast.makeText(requireContext(), R.string.auth_error, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.auth_error, Toast.LENGTH_SHORT)
+                    .show()
             else -> {
-
-                // - Deserialize bytes into a PublicKeyCredential.
-                // - Check if the response is an AuthenticationErrorResponse. If so, show a toast.
-                // - Otherwise, pass the credential to the viewModel.
-
+                val credential = PublicKeyCredential.deserializeFromBytes(bytes)
+                val response = credential.response
+                if (response is AuthenticatorErrorResponse) {
+                    Toast.makeText(requireContext(), response.errorMessage, Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    viewModel.signinResponse(credential)
+                }
             }
         }
     }
