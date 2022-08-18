@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name="com.example.android.fido2.Fido2App"
+        android:name=".Fido2App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -15,16 +15,17 @@
         android:theme="@style/Theme.Fido2"
         tools:ignore="GoogleAppIndexingWarning">
 
+        <meta-data android:name="asset_statements"
+            android:resource="@string/asset_statements" />
+
         <activity
             android:name="com.example.fido2.ui.MainActivity"
-            android:windowSoftInputMode="stateUnchanged|adjustResize">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
     </application>
 
 </manifest>

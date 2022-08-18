@@ -19,7 +19,7 @@
 
     <!-- Username -->
     <eat-comment />
-    <string name="sign_in">Sign In</string>
+    <string name="sign_in">Log in</string>
     <string name="username">Username</string>
     <string name="sign_in_explanation">For the purpose of demonstration, this app accepts any username.</string>
     <string name="next">Next</string>
@@ -31,6 +31,7 @@
     <string name="password">Password</string>
     <string name="cancelled">Cancelled</string>
     <string name="auth_error">Error trying to authenticate</string>
+    <string name="learn_more_here"><u>Learn more here</u></string>
 
     <!-- Home -->
     <string name="credentials_caption">Your registered credentials:</string>

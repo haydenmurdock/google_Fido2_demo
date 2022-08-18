@@ -42,3 +42,5 @@ sealed class ApiResult<out R> {
      */
     object SignedOutFromServer : ApiResult<Nothing>()
 }
+
+

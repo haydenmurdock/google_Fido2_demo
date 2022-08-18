@@ -8,20 +8,20 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId 'com.example.android.fido2'
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName '1.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary = true
-        buildConfigField 'String', 'API_BASE_URL', "\"https://quartz-chestnut-polyester.glitch.me/auth\""
-        resValue 'string', 'host', 'https://quartz-chestnut-polyester.glitch.me'
+        buildConfigField 'String', 'API_BASE_URL', "\"https://${getProperty('host')}/auth\""
+        resValue 'string', 'host', getProperty('host')
         resValue 'string', 'asset_statements', """
            [{
-             "include": "https://quartz-chestnut-polyester.glitch.me/.well-known/assetlinks.json"
+             "include": "${getProperty('host')}/.well-known/assetlinks.json"
            }]
         """
     }
@@ -40,15 +40,26 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            multiDexEnabled = true
+        }
     }
 }
 
 dependencies {
+    
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     implementation 'com.google.android.gms:play-services-fido:19.0.0-beta'
+    implementation "androidx.biometric:biometric:1.1.0"
 
-    implementation 'androidx.appcompat:appcompat:1.3.1'
+    def lottieVersion = "3.4.0"
+    implementation "com.airbnb.android:lottie:$lottieVersion"
+
+
+    implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'androidx.fragment:fragment-ktx:1.3.6'
 
     implementation 'androidx.core:core-ktx:1.6.0'
@@ -75,7 +86,7 @@ dependencies {
 
     implementation 'com.google.android.material:material:1.4.0'
 
-    def okhttp_version = '4.9.0'
+    def okhttp_version = '4.10.0'
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
     implementation "ru.gildor.coroutines:kotlin-coroutines-okhttp:1.0"
@@ -90,5 +101,8 @@ dependencies {
 
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-    implementation 'androidx.activity:activity-ktx:1.3.1'
+    //Gson
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+
 }

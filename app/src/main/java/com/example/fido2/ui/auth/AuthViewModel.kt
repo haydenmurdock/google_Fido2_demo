@@ -57,7 +57,7 @@ class AuthViewModel @Inject constructor(
     init {
         // See if we can authenticate using FIDO.
         viewModelScope.launch {
-            val intent = repository.signinRequest()
+            val intent = repository.signInRequest()
             if (intent != null) {
                 signinRequestChannel.send(intent)
             }
@@ -72,11 +72,11 @@ class AuthViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "(user)")
 
-    fun submitPassword() {
+    fun submitPassword(mPassword: String) {
         viewModelScope.launch {
             _processing.value = true
             try {
-                repository.password(password.value)
+                repository.password(mPassword)
             } finally {
                 _processing.value = false
             }
@@ -87,7 +87,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _processing.value = true
             try {
-                repository.signinResponse(credential)
+                repository.signInResponse(credential)
             } finally {
                 _processing.value = false
             }

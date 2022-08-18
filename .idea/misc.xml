@@ -3,9 +3,27 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/circle_btn.xml" value="0.224" />
         <entry key="app/src/main/res/drawable/ic_add.xml" value="0.222" />
+        <entry key="app/src/main/res/drawable/ic_arrow_white.xml" value="0.25" />
+        <entry key="app/src/main/res/drawable/ic_delete.xml" value="0.1925" />
+        <entry key="app/src/main/res/drawable/light_grey_circle.xml" value="0.241" />
+        <entry key="app/src/main/res/drawable/no_thanks_btn.xml" value="0.25" />
+        <entry key="app/src/main/res/drawable/password_email_shape.xml" value="0.25" />
+        <entry key="app/src/main/res/drawable/shape.xml" value="0.25" />
+        <entry key="app/src/main/res/drawable/white_popup_shape.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/auth_fragment.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/bank_account.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/black_screen.xml" value="0.4036458333333333" />
+        <entry key="app/src/main/res/layout/credential_item.xml" value="0.21041666666666667" />
         <entry key="app/src/main/res/layout/fragment_fido_picker.xml" value="0.34236675700090335" />
+        <entry key="app/src/main/res/layout/home_fragment.xml" value="0.29791666666666666" />
         <entry key="app/src/main/res/layout/main_activity.xml" value="0.17916666666666667" />
+        <entry key="app/src/main/res/layout/passwordless_dialog.xml" value="0.40260416666666665" />
+        <entry key="app/src/main/res/layout/setting_up_device.xml" value="0.40260416666666665" />
+        <entry key="app/src/main/res/layout/succesful_setup.xml" value="0.18796296296296297" />
+        <entry key="app/src/main/res/layout/username_fragment.xml" value="0.3189033189033189" />
+        <entry key="app/src/main/res/menu/home.xml" value="0.21041666666666667" />
       </map>
     </option>
   </component>

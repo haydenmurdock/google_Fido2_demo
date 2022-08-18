@@ -17,11 +17,14 @@
 package com.example.fido2.ui.home
 
 import android.app.PendingIntent
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fido2.api.PresidioIdentityAuthApi
 import com.example.fido2.repository.AuthRepository
 import com.example.fido2.repository.SignInState
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredential
+import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialCreationOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,10 +33,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.fido2.api.ApiResult
+import com.google.android.gms.common.api.Api
+import com.google.android.gms.fido.fido2.Fido2ApiClient
+import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialRequestOptions
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: AuthRepository
+    private val repository: AuthRepository,
+    private val presidioIdentityAuthApi: PresidioIdentityAuthApi
 ) : ViewModel() {
 
     private val _processing = MutableStateFlow(false)
@@ -92,6 +100,26 @@ class HomeViewModel @Inject constructor(
                 _processing.value = false
             }
         }
+    }
+
+ suspend fun sendUsernameToPI(mUserName: String): ApiResult<PublicKeyCredentialCreationOptions>?{
+      var result:ApiResult<PublicKeyCredentialCreationOptions>? = null
+        if (mUserName.isNotBlank()) {
+            result = presidioIdentityAuthApi.username(mUserName)
+        }
+      return result
+    }
+
+    suspend fun getPendingIntent(x: PublicKeyCredentialCreationOptions): PendingIntent? {
+        var pendingIntent: PendingIntent? = null
+            viewModelScope.launch {
+              pendingIntent = repository.registerPIRequest(x)
+            }
+        return pendingIntent
+    }
+
+    fun getFido2client(): Fido2ApiClient? {
+        return repository.getFido2ApiClient()
     }
 
 }

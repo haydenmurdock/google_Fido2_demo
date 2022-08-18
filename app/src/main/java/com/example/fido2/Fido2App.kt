@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.example.android.fido2
+package com.example.fido2
 
 import android.app.Application
+import android.content.Context
 import android.os.Build
-import android.os.StrictMode
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.example.fido2.BuildConfig.APPLICATION_ID
+import com.example.fido2.BuildConfig.VERSION_NAME
 import com.example.fido2.api.AddHeaderInterceptor
-import com.example.fido2.BuildConfig
-import com.example.fido2.repository.AuthRepository
-import com.example.fido2.repository.SignInState
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,7 +47,7 @@ object AppModule {
     @Singleton
     @Provides
     fun provideOkHttpClient() : OkHttpClient {
-        val userAgent = "${BuildConfig.APPLICATION_ID}/${BuildConfig.VERSION_NAME} " +
+        val userAgent = "${APPLICATION_ID}/${VERSION_NAME} " +
             "(Android ${Build.VERSION.RELEASE}; ${Build.MODEL}; ${Build.BRAND})"
         return OkHttpClient.Builder()
             .addInterceptor(AddHeaderInterceptor(userAgent))
@@ -69,9 +68,5 @@ object AppModule {
             application.preferencesDataStoreFile("auth")
         }
     }
-        init {
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-
-    }
 }
+

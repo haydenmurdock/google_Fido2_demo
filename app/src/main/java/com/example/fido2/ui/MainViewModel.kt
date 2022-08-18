@@ -33,8 +33,5 @@ import javax.inject.Inject
     fun setFido2ApiClient(client: Fido2ApiClient?) {
         repository.setFido2APiClient(client)
     }
-    fun setupOther(){
-        repository.signInStateMutable.tryEmit(SignInState.Other("User hasn't picked auth"))
-    }
 
 }

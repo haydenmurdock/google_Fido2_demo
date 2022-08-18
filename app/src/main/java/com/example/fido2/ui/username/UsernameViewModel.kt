@@ -18,19 +18,17 @@ package com.example.fido2.ui.username
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fido2.api.PresidioIdentityAuthApi
 import com.example.fido2.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class UsernameViewModel @Inject constructor(
-    private val repository: AuthRepository
+    private val repository: AuthRepository,
+    private val presidioApi: PresidioIdentityAuthApi
 ) : ViewModel() {
 
     private val _sending = MutableStateFlow(false)
@@ -42,16 +40,26 @@ class UsernameViewModel @Inject constructor(
         !isSending && username.isNotBlank()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
-    fun sendUsername() {
-        val username = username.value
-        if (username.isNotBlank()) {
-            viewModelScope.launch {
-                _sending.value = true
-                try {
-                    repository.username(username)
-                } finally {
-                    _sending.value = false
-                }
+    fun sendUsername(mUserName: String) {
+//        val username = mUserName
+//        println("Sending: $username")
+//        if (username.isNotBlank()) {
+//            viewModelScope.launch {
+//                _sending.value = true
+//                try {
+//                    repository.username(username)
+//                } finally {
+//                    _sending.value = false
+//                }
+//            }
+//        }
+    }
+    fun goToHomeScreen(mUserName: String){
+    //    var response:ApiResult<PublicKeyCredentialCreationOptions>? = null
+
+        if (mUserName.isNotBlank()) {
+            viewModelScope.launch{
+                    repository.signedInWorkaround()
             }
         }
     }
