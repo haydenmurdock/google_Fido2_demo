@@ -403,11 +403,11 @@ private val client: OkHttpClient
         var displayName = ""
         while (reader.hasNext()) {
             when (reader.nextName()) {
-                "user_id" -> {
+                "id" -> {
                     id = reader.nextString()
-                    ChallengeHolder.setUserString(id)
+                  //  ChallengeHolder.setUserString(id)
                 }
-                "username" -> name = reader.nextString()
+                "name" -> name = reader.nextString()
                 "displayName" -> displayName = reader.nextString()
                 else -> reader.skipValue()
             }
